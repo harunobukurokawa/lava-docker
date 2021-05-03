@@ -393,7 +393,7 @@ def main():
             "name",
             "remote_user", "remote_master", "remote_address", "remote_rpc_port", "remote_proto", "remote_user_token",
             "tags",
-            "use_docker", "use_nfs", "use_nbd", "use_overlay_server", "use_tftp", "use_tap",
+            "use_docker", "use_nfs", "use_nbd", "use_overlay_server", "use_tftp", "use_tap", "use_dns",
             "version",
         ]
         for keyword in slave:
@@ -427,6 +427,7 @@ def main():
         dockcomp["services"][name]["dns_search"] = ""
         dockcomp["services"][name]["ports"] = []
         dockcomp["services"][name]["volumes"] = [ "/boot:/boot", "/lib/modules:/lib/modules" ]
+        dockcomp["services"][name]["dns"] = []
         dockcomp["services"][name]["environment"] = {}
         dockcomp["services"][name]["build"] = {}
         dockcomp["services"][name]["build"]["context"] = name
@@ -608,6 +609,11 @@ def main():
             fp.write("apt-get -y install nfs-kernel-server\n")
             fp.close()
             os.chmod("%s/scripts/extra_actions" % workerdir, 0o755)
+        use_dns = True
+        if "use_dns" in worker:
+            use_dns = worker["use_dns"]
+        if use_dns:
+            dockcomp["services"][name]["dns"].append("8.8.8.8")
         with open(dockcomposeymlpath, 'w') as f:
             yaml.dump(dockcomp, f)
         if "loglevel" in worker:
